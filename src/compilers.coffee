@@ -40,19 +40,6 @@ compilers.jeco = (path) ->
 
 require.extensions['.jeco'] = require.extensions['.eco']
 
-try
-  jade = require 'jade'
-
-  compilers.jade = (path) ->
-    content = fs.readFileSync path, 'utf8'
-    fn = jade.compile content, client: true, filename: path
-    "module.exports = #{fn.toString()}"
-
-  require.extensions['.jade'] = (module, filename) ->
-    module._compile(compilers.jade(filename))
-
-catch err
-
 compilers.tmpl = (path) ->
   content = fs.readFileSync(path, 'utf8')
   "var template = jQuery.template(#{JSON.stringify(content)});\n" +
@@ -78,6 +65,32 @@ try
   require.extensions['.styl'] = (module, filename) ->
     source = JSON.stringify(compilers.styl(filename))
     module._compile "module.exports = #{source}", filename
+catch err
+
+try
+  jade = require('jade')
+
+  compilers.jade = (path) ->
+    content = fs.readFileSync(path, 'utf8')
+    result = ''
+
+    fn = jade.compile content,
+      filename:     path
+                    # Is there a way of getting the optimist-style argv in this module?
+                    # Not DRY but it works.
+      compileDebug: ('-d' in process.argv) or ('--debug' in process.argv)
+      client:       true
+    source = fn.toString()
+    
+    """
+    var jade = require('jade-runtimeify');
+    module.exports = #{source};
+
+    """
+  
+  require.extensions['.jade'] = (module, filename) ->
+    module._compile compilers.jade filename
+
 catch err
 
 module.exports = compilers
