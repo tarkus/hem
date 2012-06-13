@@ -42,10 +42,15 @@ require.extensions['.jeco'] = require.extensions['.eco']
 
 try
   jade = require 'jade'
+
   compilers.jade = (path) ->
     content = fs.readFileSync path, 'utf8'
     fn = jade.compile content, client: true, filename: path
     "module.exports = #{fn.toString()}"
+
+  require.extensions['.jade'] = (module, filename) ->
+    module._compile(compilers.jade(filename))
+
 catch err
 
 compilers.tmpl = (path) ->

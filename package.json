@@ -17,6 +17,7 @@
   "bin": { "hem": "./bin/hem" },
   "dependencies" : {
     "eco": "1.1.0-rc-3",
+    "jade": "~0.26.1",
     "uglify-js": "~1.1.1",
     "fast-detective": "~0.0.1",
     "optimist": "~0.2.6",
